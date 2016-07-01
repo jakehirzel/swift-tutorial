@@ -15,13 +15,20 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var ratingControl: RatingControl!
+    @IBOutlet weak var saveButton: UIBarButtonItem!
+    
+    // Either comes from 'MealTableViewController' in 'prepareForSegue()' or from adding a new meal
+    var meal: Meal?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Handle the text field's user input through delegate callbacks
         nameTextField.delegate = self
-
+        
+        // Disable Save if no text
+        checkValidMealName()
+        
     }
     
     // MARK: UITextFieldDelegate
@@ -33,8 +40,21 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         
     }
     
-    func textFieldDidEndEditing(textField: UITextField) {
+    func textFieldDidBeginEditing(textField: UITextField) {
+        
+    }
+    
+    func checkValidMealName () {
+        
+        // Disable Save button if text is empty
+        let text = nameTextField.text ?? ""
+        saveButton.enabled = !text.isEmpty
+        
+    }
 
+    func textFieldDidEndEditing(textField: UITextField) {
+        checkValidMealName()
+        navigationItem.title = textField.text
     }
     
     // MARK: UIImagePickerControllerDelegate
@@ -56,6 +76,22 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         // Dismiss the picker
         dismissViewControllerAnimated(true, completion: nil)
         
+    }
+    
+    // MARK: Navigation
+    
+    @IBAction func cancel(sender: UIBarButtonItem) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if saveButton === sender {
+            let name = nameTextField.text ?? ""
+            let photo = photoImageView.image
+            let rating = ratingControl.rating
+            meal = Meal(name: name, photo: photo, rating: rating)
+        }
     }
     
     // MARK: Actions
